@@ -1,11 +1,16 @@
 # Database Advanced Script
 This directory contains SQL scripts with advanced queries for the AirBnB database, focusing on complex joins.
-Files
 
+## Files
 joins_queries.sql: SQL script with three queries demonstrating different types of joins.
 Query 1: INNER JOIN to retrieve bookings and their corresponding users.
 Query 2: LEFT JOIN to retrieve all properties and their reviews, including properties without reviews.
 Query 3: FULL OUTER JOIN to retrieve all users and bookings, including those without matches.
+Target DBMS: PostgreSQL.
+
+subqueries.sql: SQL script with two queries demonstrating correlated and non-correlated subqueries.
+Query 1: Non-correlated subquery to find properties with an average rating greater than 4.0.
+Query 2: Correlated subquery to find users who have made more than 3 bookings.
 Target DBMS: PostgreSQL.
 
 ## Prerequisites
@@ -30,6 +35,3 @@ Replace <username> with your PostgreSQL username.
 ### View results:
 Each query returns results based on the sample data.
 Use SELECT * FROM <table> to inspect related data if needed.
-
-
-
