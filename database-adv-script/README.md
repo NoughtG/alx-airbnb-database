@@ -13,6 +13,11 @@ Query 1: Non-correlated subquery to find properties with an average rating great
 Query 2: Correlated subquery to find users who have made more than 3 bookings.
 Target DBMS: PostgreSQL.
 
+aggregations_and_window_functions.sql: SQL script with two queries demonstrating aggregation and window functions.
+Query 1: Aggregation using COUNT and GROUP BY to find the total number of bookings per user.
+Query 2: Window functions (ROW_NUMBER, RANK) to rank properties by total number of bookings.
+Target DBMS: PostgreSQL.
+
 ## Prerequisites
 The database schema must be created using database-script-0x01/schema.sql.
 Sample data should be populated using database-script-0x02/seed.sql.
