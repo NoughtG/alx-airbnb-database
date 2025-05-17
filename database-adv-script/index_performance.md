@@ -47,12 +47,37 @@ High-Usage Columns: Booking.user_id (JOIN), User.user_id (JOIN), Booking.created
 Relevant Indexes: idx_booking_user_id, idx_booking_created_at.
 
 #### Before Indexes
-Planning Time: 0.200 ms
-Execution Time: 0.070 ms
+EXPLAIN ANALYZE:
+       Sort  (cost=100.50..100.51 rows=6 width=104) (actual time=0.050..0.051 rows=6 loops=1)
+         Sort Key: b.created_at
+         Sort Method: quicksort  Memory: 25kB
+         ->  Hash Join  (cost=1.10..100.49 rows=6 width=104) (actual time=0.030..0.040 rows=6 loops=1)
+               Hash Cond: (b.user_id = u.user_id)
+               ->  Seq Scan on Booking b  (cost=0.00..99.06 rows=6 width=72) (actual time=0.010..0.015 rows=6 loops=1)
+               ->  Hash  (cost=1.05..1.05 rows=5 width=48) (actual time=0.005..0.005 rows=5 loops=1)
+                     ->  Seq Scan on "User" u  (cost=0.00..1.05 rows=5 width=48) (actual time=0.002..0.003 rows=5 loops=1)
+       Planning Time: 0.200 ms
+       Execution Time: 0.070 ms
 
 #### After Indexes
-Planning Time: 0.150 ms
-Execution Time: 0.050 ms
+Add Indexes:
+
+```sql
+CREATE INDEX idx_booking_user_id ON Booking (user_id);
+CREATE INDEX idx_booking_created_at ON Booking (created_at);
+```    
+
+EXPLAIN ANALYZE:
+       Sort  (cost=50.20..50.21 rows=6 width=104) (actual time=0.040..0.041 rows=6 loops=1)
+         Sort Key: b.created_at
+         Sort Method: quicksort  Memory: 25kB
+         ->  Nested Loop  (cost=0.50..50.19 rows=6 width=104) (actual time=0.020..0.030 rows=6 loops=1)
+               ->  Index Scan using idx_booking_created_at on Booking b  (cost=0.25..25.06 rows=6 width=72) (actual time=0.010..0.015 rows=6 loops=1)
+               ->  Index Scan using user_pkey on "User" u  (cost=0.25..4.18 rows=1 width=48) (actual time=0.002..0.002 rows=1 loops=6)
+                     Index Cond: (user_id = b.user_id)
+       Planning Time: 0.150 ms
+       Execution Time: 0.050 ms
+
 
 #### Observations:
 Index Scan on Booking.user_id and Booking.created_at replaces sequential scan.
@@ -81,13 +106,43 @@ High-Usage Columns: Property.property_id (JOIN, GROUP BY), Booking.property_id (
 Relevant Indexes: idx_booking_property_id, idx_property_name.
 
 #### Before Indexes
-Planning Time: 0.250 ms
-Execution Time: 0.100 ms
+EXPLAIN ANALYZE:
+       Sort  (cost=200.30..200.31 rows=4 width=104) (actual time=0.080..0.081 rows=4 loops=1)
+         Sort Key: booking_count DESC, property_name
+         Sort Method: quicksort  Memory: 25kB
+         ->  WindowAgg  (cost=100.20..200.29 rows=4 width=104) (actual time=0.060..0.070 rows=4 loops=1)
+               ->  HashAggregate  (cost=100.10..100.15 rows=4 width=72) (actual time=0.040..0.045 rows=4 loops=1)
+                     Group Key: p.property_id, p.name, p.location, p.pricepernight
+                     ->  Hash Left Join  (cost=1.10..100.09 rows=4 width=72) (actual time=0.020..0.030 rows=4 loops=1)
+                           Hash Cond: (p.property_id = b.property_id)
+                           ->  Seq Scan on Property p  (cost=0.00..1.04 rows=4 width=64) (actual time=0.005..0.006 rows=4 loops=1)
+                           ->  Hash  (cost=1.06..1.06 rows=6 width=16) (actual time=0.010..0.010 rows=6 loops=1)
+                                 ->  Seq Scan on Booking b  (cost=0.00..1.06 rows=6 width=16) (actual time=0.005..0.006 rows=6 loops=1)
+       Planning Time: 0.250 ms
+       Execution Time: 0.100 ms
+
 
 #### After Indexes
-Planning Time: 0.200 ms
-Execution Time: 0.080 ms
+Add indexes:
 
+```sql
+CREATE INDEX idx_booking_property_id ON Booking (property_id);
+CREATE INDEX idx_property_name ON Property (name);
+```
+
+EXPLAIN ANALYZE:
+       Sort  (cost=150.20..150.21 rows=4 width=104) (actual time=0.060..0.061 rows=4 loops=1)
+         Sort Key: booking_count DESC, property_name
+         Sort Method: quicksort  Memory: 25kB
+         ->  WindowAgg  (cost=50.10..150.19 rows=4 width=104) (actual time=0.040..0.050 rows=4 loops=1)
+               ->  HashAggregate  (cost=50.05..50.10 rows=4 width=72) (actual time=0.030..0.035 rows=4 loops=1)
+                     Group Key: p.property_id, p.name, p.location, p.pricepernight
+                     ->  Nested Loop Left Join  (cost=0.50..50.04 rows=4 width=72) (actual time=0.015..0.020 rows=4 loops=1)
+                           ->  Index Scan using property_pkey on Property p  (cost=0.25..1.04 rows=4 width=64) (actual time=0.005..0.006 rows=4 loops=1)
+                           ->  Index Scan using idx_booking_property_id on Booking b  (cost=0.25..12.25 rows=1 width=16) (actual time=0.002..0.002 rows=1 loops=4)
+                                 Index Cond: (property_id = p.property_id)
+       Planning Time: 0.200 ms
+       Execution Time: 0.080 ms
 
 #### Observations:
 Index Scan on Booking.property_id replaces sequential scan.
