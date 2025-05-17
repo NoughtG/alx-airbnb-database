@@ -26,6 +26,17 @@ Target DBMS: PostgreSQL.
 Includes EXPLAIN ANALYZE results for two queries.
 Provides recommendations for scaling and maintenance.
 
+**performance.sql**: SQL script with initial and refactored queries for performance optimization.
+Initial query retrieves all bookings with user, property, and payment details.
+Refactored query optimizes performance with fewer columns and filtering.
+Includes new indexes for optimization.
+Target DBMS: PostgreSQL.
+  
+**optimization_report.md**: Documentation analyzing and optimizing a complex query.
+Includes EXPLAIN outputs for initial and refactored queries.
+Details inefficiencies and performance improvements.
+Provides recommendations for further optimization.
+
 ## Prerequisites
 The database schema must be created using database-script-0x01/schema.sql.
 Sample data should be populated using database-script-0x02/seed.sql.
